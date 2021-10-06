@@ -46,7 +46,9 @@ jobs:
               lunch twrp_$DEVICE-eng || true
               export ALLOW_MISSING_DEPENDENCIES=true && mka ${TARGET}image
               mv $OUT/recovery.img $OUT/twrp-11-${DEVICE}-$(date +%F).img
-       - uses: actions/create-release@v1
+       - name: Create Release
+         id: create_release
+         uses: actions/create-release@v1
          env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
          with:
@@ -64,5 +66,5 @@ jobs:
          env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
          with:
-           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-           asset_path: out/target/product/*/twrp*.img
+           upload_url: ${{ steps.create_release.outputs.upload_url }}
+           asset_path: out/target/product/${DEVICE}/twrp*.img
