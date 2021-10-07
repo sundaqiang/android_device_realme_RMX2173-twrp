@@ -57,8 +57,7 @@ jobs:
            release_name: Release ${{ github.ref }}
            body: |
              Changes in this Release
-             - First Change
-             - Second Change
+             - TWRP bringup!
            draft: false
            prerelease: false
            
