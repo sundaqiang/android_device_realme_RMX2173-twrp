@@ -45,7 +45,6 @@ jobs:
               . build/envsetup.sh
               lunch twrp_$DEVICE-eng || true
               export ALLOW_MISSING_DEPENDENCIES=true && mka ${TARGET}image
-              mv $OUT/recovery.img $OUT/twrp-11-${DEVICE}-$(date +%F).img
               
        - name: Create Release
          id: create_release
@@ -68,4 +67,6 @@ jobs:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
          with:
            upload_url: ${{ steps.create_release.outputs.upload_url }}
-           asset_path: out/target/product/${DEVICE}/twrp*.img
+           asset_path: out/target/product/${DEVICE}/recovery.img
+           asset_name: recovery.img
+           asset_content_type: application/x-img
