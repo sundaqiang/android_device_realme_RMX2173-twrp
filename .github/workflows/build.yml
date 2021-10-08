@@ -13,12 +13,8 @@ on:
             default: ''
 
 env:
+  TARGET: twrp
   MANIFEST: git://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
-  MANIFEST_BRANCH: twrp-11
-  DEVICE: RMX2173
-  DT_REPO: https://github.com/sundaqiang/android_device_realme_RMX2173-twrp
-  DT_PATH: device/realme/RMX2173
-  TARGET: recovery
 
 jobs:
   build:
@@ -27,33 +23,13 @@ jobs:
     steps:
        - name: Cleaning Up Runner
          uses: rokibhasansagar/slimhub_actions@main
-         
-       - name: Initializing environment
-         run: |
-            export DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 JAVA_OPTS=" -Xmx7G " JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-            sudo apt-get -qqy update &>/dev/null
-            sudo apt-get -qqy install --no-install-recommends lsb-core lsb-security patchutils bc android-sdk-platform-tools adb fastboot openjdk-8-jdk ca-certificates-java maven python-all-dev python-is-python2 lzip lzop xzdec pixz libzstd-dev lib32z1-dev exfat-utils exfat-fuse gcc gcc-multilib g++-multilib clang llvm lld cmake ninja-build libxml2-utils xsltproc expat re2c libxml2-utils xsltproc expat re2c libreadline-gplv2-dev libsdl1.2-dev libtinfo5 xterm rename schedtool bison gperf libb2-dev pngcrush imagemagick optipng advancecomp &>/dev/null
-            sudo apt-get -qqy purge default-jre-headless openjdk-11-jre-headless &>/dev/null
-            sudo apt-get -qy clean &>/dev/null && sudo apt-get -qy autoremove &>/dev/null
-            sudo rm -rf -- /var/lib/apt/lists/* /var/cache/apt/archives/* &>/dev/null
-            git config --global user.name "sundaqiang"
-            git config --global user.email "393116105@qq.com"    
-            sudo curl --create-dirs -L -o /usr/local/bin/repo -O -L https://storage.googleapis.com/git-repo-downloads/repo
-            sudo chmod a+rx /usr/local/bin/repo
+
+       - name: Auto Adapt Manifest
+         run: echo "MANIFEST=${MANIFEST} -b ${GITHUB_REF##*/}" >> $GITHUB_ENV
             
-       - name: Sync recovery and device tree sources
-         run: |
-             repo init --depth=1 -u $MANIFEST -b $MANIFEST_BRANCH
-             repo sync -f --force-sync --no-clone-bundle --no-tags -j$(nproc --all)
-             git clone $DT_REPO --depth=1 $DT_PATH
-             
-       - name: Build
-         run: |
-              . build/envsetup.sh
-              lunch twrp_$DEVICE-eng || true
-              export ALLOW_MISSING_DEPENDENCIES=true && mka ${TARGET}image
-              echo "BuildPath=/home/runner/builder" >> ${GITHUB_ENV}
-              
+       - name: Recovery Compilation
+         uses: sundaqiang/Recovery-Compiler@production
+ 
        - name: Create Release
          id: create_release
          uses: actions/create-release@v1
@@ -72,7 +48,7 @@ jobs:
          env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
          with:
-           file: "${BuildPath}/out/target/product/${DEVICE}/{recovery.img,*.zip}"
+           file: "${BuildPath}/out/target/product/${CODENAME}/{recovery.img,*.zip}"
            release_id: ${{ steps.create_release.outputs.id }}
            overwrite: true
            verbose: true
