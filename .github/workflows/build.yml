@@ -52,7 +52,8 @@ jobs:
               . build/envsetup.sh
               lunch twrp_$DEVICE-eng || true
               export ALLOW_MISSING_DEPENDENCIES=true && mka ${TARGET}image
-              cd ./out/target/product/$DEVICE
+              echo "CODENAME=${CODENAME}" >> ${GITHUB_ENV}
+              echo "BuildPath=/home/runner/builder" >> ${GITHUB_ENV}
               
        - name: Create Release
          id: create_release
@@ -72,7 +73,7 @@ jobs:
          env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
          with:
-           file: "recovery.img"
+           file: "${BuildPath}/out/target/product/${CODENAME}/{recovery.img,*.zip}"
            release_id: ${{ steps.create_release.outputs.id }}
            overwrite: true
            verbose: true
