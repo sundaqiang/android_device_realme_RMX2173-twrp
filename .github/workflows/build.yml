@@ -14,7 +14,7 @@ on:
 
 env:
   TARGET: twrp
-  MANIFEST: git://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
+  MANIFEST: git://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b ${{ GITHUB_REF##*/ }}
 
 jobs:
   build:
@@ -24,12 +24,9 @@ jobs:
        - name: Cleaning Up Runner
          uses: rokibhasansagar/slimhub_actions@main
 
-       - name: Auto Adapt Manifest
-         run: echo "MANIFEST=${MANIFEST} -b ${GITHUB_REF##*/}" >> $GITHUB_ENV
-            
        - name: Recovery Compilation
          uses: sundaqiang/Recovery-Compiler@production
- 
+
        - name: Create Release
          id: create_release
          uses: actions/create-release@v1
