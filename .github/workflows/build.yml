@@ -1,43 +1,50 @@
 name: Building TWRP
 
 on:
-  push:
-    # Sequence of patterns matched against refs/tags
-    tags:
-    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+  workflow_dispatch:
+    inputs:
+        tagName:
+            description: 'tagName'     
+            required: true
+            default: ''
+        tagBody:
+            description: 'tagBody'     
+            required: true
+            default: ''
 
 env:
-  MANIFEST: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
+  MANIFEST: git://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
   MANIFEST_BRANCH: twrp-11
   DEVICE: RMX2173
   DT_REPO: https://github.com/sundaqiang/android_device_realme_RMX2173-twrp
   DT_PATH: device/realme/RMX2173
   TARGET: recovery
-  TZ: Asia/China
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     steps:
+       - name: Cleaning Up Runner
+         uses: rokibhasansagar/slimhub_actions@main
+         
        - name: Initializing environment
          run: |
-            sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
-            docker rmi `docker images -q`
-            sudo apt-get remove account-plugin-facebook account-plugin-flickr account-plugin-jabber account-plugin-salut account-plugin-twitter account-plugin-windows-live account-plugin-yahoo aisleriot brltty duplicity empathy empathy-common example-content gnome-accessibility-themes gnome-contacts gnome-mahjongg gnome-mines gnome-orca gnome-screensaver gnome-sudoku gnome-video-effects gnomine landscape-common libreoffice-avmedia-backend-gstreamer libreoffice-base-core libreoffice-calc libreoffice-common libreoffice-core libreoffice-draw libreoffice-gnome libreoffice-gtk libreoffice-impress libreoffice-math libreoffice-ogltrans libreoffice-pdfimport libreoffice-style-galaxy libreoffice-style-human libreoffice-writer libsane libsane-common mcp-account-manager-uoa python3-uno rhythmbox rhythmbox-plugins rhythmbox-plugin-zeitgeist sane-utils shotwell shotwell-common telepathy-gabble telepathy-haze telepathy-idle telepathy-indicator telepathy-logger telepathy-mission-control-5 telepathy-salut totem totem-common totem-plugins printer-driver-brlaser printer-driver-foo2zjs printer-driver-foo2zjs-common printer-driver-m2300w printer-driver-ptouch printer-driver-splix
+            export DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 JAVA_OPTS=" -Xmx7G " JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+            sudo apt-get -qqy update &>/dev/null
+            sudo apt-get -qqy install --no-install-recommends lsb-core lsb-security patchutils bc android-sdk-platform-tools adb fastboot openjdk-8-jdk ca-certificates-java maven python-all-dev python-is-python2 lzip lzop xzdec pixz libzstd-dev lib32z1-dev exfat-utils exfat-fuse gcc gcc-multilib g++-multilib clang llvm lld cmake ninja-build libxml2-utils xsltproc expat re2c libxml2-utils xsltproc expat re2c libreadline-gplv2-dev libsdl1.2-dev libtinfo5 xterm rename schedtool bison gperf libb2-dev pngcrush imagemagick optipng advancecomp &>/dev/null
+            sudo apt-get -qqy purge default-jre-headless openjdk-11-jre-headless &>/dev/null
+            sudo apt-get -qy clean &>/dev/null && sudo apt-get -qy autoremove &>/dev/null
+            sudo rm -rf -- /var/lib/apt/lists/* /var/cache/apt/archives/* &>/dev/null
             git config --global user.name "sundaqiang"
-            git config --global user.email "393116105@qq.com"         
-            sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php* 
-            sudo -E apt-get clean
-            sudo -E apt-get -qq update
-            sudo -E apt-get -qq install bc build-essential zip curl libstdc++6 git wget python gcc clang libssl-dev repo rsync flex curl bison aria2
+            git config --global user.email "393116105@qq.com"    
             sudo curl --create-dirs -L -o /usr/local/bin/repo -O -L https://storage.googleapis.com/git-repo-downloads/repo
             sudo chmod a+rx /usr/local/bin/repo
             
        - name: Sync recovery and device tree sources
          run: |
-             repo init -u $MANIFEST -b $MANIFEST_BRANCH --depth=1 --groups=all,-notdefault,-device,-darwin,-x86,-mips
-             repo sync -j$(nproc --all)
+             repo init --depth=1 -u $MANIFEST -b $MANIFEST_BRANCH
+             repo sync -f --force-sync --no-clone-bundle --no-tags -j$(nproc --all)
              git clone $DT_REPO --depth=1 $DT_PATH
              
        - name: Build
@@ -50,13 +57,11 @@ jobs:
          id: create_release
          uses: actions/create-release@v1
          env:
-           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
          with:
-           tag_name: ${{ github.ref }}
-           release_name: Release ${{ github.ref }}
-           body: |
-             Changes in this Release
-             - TWRP bringup!
+           tag_name: ${{ github.event.inputs.tagName }}
+           release_name: Release ${{ github.event.inputs.tagName }}
+           body: ${{ github.event.inputs.tagBody }}
            draft: false
            prerelease: false
            
