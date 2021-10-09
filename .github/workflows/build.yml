@@ -47,6 +47,7 @@ jobs:
          with:
            file: "${BuildPath}/out/target/product/${CODENAME}/{recovery.img,*.zip}"
            release_id: ${{ steps.create_release.outputs.id }}
+           tag_name: ${{ github.event.inputs.tagName }}
            overwrite: true
            verbose: true
            draft: false
