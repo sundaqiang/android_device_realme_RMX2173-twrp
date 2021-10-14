@@ -43,8 +43,6 @@ TARGET_OTA_ASSERT_DEVICE := RMX2173,2173CN,2175,2175CN
 
 # Kernel
 BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2
-#buildvariant=user loop.max_part=70
-BOARD_KERNEL_IMAGE_NAME := kernel
 TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/kernel
 BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilt/dtbo
 TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb
@@ -145,6 +143,7 @@ TW_H_OFFSET := -115
 TARGET_USES_MKE2FS := true
 TW_EXCLUDE_APEX := true
 TW_OZIP_DECRYPT_KEY := 1C4C1EA3A12531AE491B21BB31613C11
+TW_INCLUDE_LOGICAL := my_product my_engineering my_company my_carrier my_region my_heytap my_stock my_preload my_manifest
 
 # resetprop and magiskboot
 TW_INCLUDE_RESETPROP := true
