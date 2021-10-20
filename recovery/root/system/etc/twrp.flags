@@ -25,4 +25,5 @@
 /vbmeta_system    emmc    /dev/block/by-name/vbmeta_system            flags=display="Vbmeta System";flashimg=1;backup=1;
 /vbmeta_vendor    emmc    /dev/block/by-name/vbmeta_vendor            flags=display="Vbmeta Vendor";flashimg=1;backup=1;
 
-/usbstorage       auto    /dev/block/sdd1  /dev/block/sdd             flags=display="USB Storage";storage;wipeingui;removable;fsflags="utf8"
+/usb-otg          vfat    /dev/block/sdd1  /dev/block/sdd             flags=display="usb-otg";storage;wipeingui;removable;fsflags="utf8"
+/external_sd      vfat    /dev/block/mmcblk0p1  /dev/block/mmcblk0    flags=display="external_sd";storage;wipeingui;removable;fsflags="utf8"

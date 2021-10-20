@@ -60,6 +60,12 @@ subsystem sound
 # CDMA radio interface MUX
 /dev/ppp                  0660   radio      vpn
 
+#ifdef OPLUS_FEATURE_STORAGE_TOOL
+#Xuweijie1@BSP.Storage , 20200601. add for Memory Monitor
+/dev/sg3         0600   system     system
+/dev/block/mmcblk0p1 0600   system     system
+#endif /* OPLUS_FEATURE_STORAGE_TOOL */
+
 # sysfs properties
 /sys/devices/platform/trusty.*      trusty_version        0440  root   log
 /sys/devices/virtual/input/input*   enable      0660  root   input
